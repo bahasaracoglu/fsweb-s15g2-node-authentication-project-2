@@ -1,4 +1,5 @@
 const { JWT_SECRET } = require("../secrets"); // bu secreti kullanın!
+const jwt = require("jsonwebtoken");
 const usersModel = require("../users/users-model");
 
 const sinirli = (req, res, next) => {
@@ -17,6 +18,23 @@ const sinirli = (req, res, next) => {
 
     Alt akıştaki middlewarelar için hayatı kolaylaştırmak için kodu çözülmüş tokeni req nesnesine koyun!
   */
+  try {
+    let authHeader = req.headers["authorization"]; // req.headers.authorization
+    if (!authHeader) {
+      res.status(401).json({ message: "Token gereklidir" });
+    } else {
+      jwt.verify(authHeader, JWT_SECRET, (err, decodedToken) => {
+        if (err) {
+          res.status(401).json({ message: "token gecersizdir" });
+        } else {
+          req.decodedToken = decodedToken;
+          next();
+        }
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 };
 
 const sadece = (role_name) => (req, res, next) => {
@@ -31,6 +49,16 @@ const sadece = (role_name) => (req, res, next) => {
 
     Tekrar authorize etmekten kaçınmak için kodu çözülmüş tokeni req nesnesinden çekin!
   */
+  try {
+    if (req.decodedToken.role_name === role_name) {
+      next();
+    }
+    res.status(403).json({
+      message: "Bu, senin için değil",
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 const usernameVarmi = async (req, res, next) => {
