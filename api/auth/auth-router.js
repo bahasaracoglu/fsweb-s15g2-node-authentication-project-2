@@ -5,14 +5,13 @@ const {
   checkPayload,
 } = require("./auth-middleware");
 const { JWT_SECRET } = require("../secrets"); // bu secret'ı kullanın!
-const bcrypt = require("bcryptjs");
-const usersModel = require("../users/users-model");
 const jwt = require("jsonwebtoken");
+const bcryptjs = require("bcryptjs");
+const userModel = require("../users/users-model");
 
 router.post(
   "/register",
   checkPayload,
-  usernameVarmi,
   rolAdiGecerlimi,
   async (req, res, next) => {
     /**
@@ -27,22 +26,21 @@ router.post(
     }
    */
     try {
-      let { username, password, role_name } = req.body;
-      const hashedPassword = bcrypt.hashSync(password);
-      let newUser = {
-        username: username,
+      let hashedPassword = bcryptjs.hashSync(req.body.password);
+      let userRequestModel = {
+        username: req.body.username,
         password: hashedPassword,
-        role_name: role_name,
+        role_name: req.body.role_name,
       };
-      const insertedUser = await usersModel.ekle(newUser);
-      res.status(201).json(insertedUser);
+      const registeredUser = await userModel.ekle(userRequestModel);
+      res.status(201).json(registeredUser);
     } catch (error) {
       next(error);
     }
   }
 );
 
-router.post("/login", checkPayload, usernameVarmi, async (req, res, next) => {
+router.post("/login", checkPayload, usernameVarmi, (req, res, next) => {
   /**
     [POST] /api/auth/login { "username": "sue", "password": "1234" }
 
@@ -61,29 +59,17 @@ router.post("/login", checkPayload, usernameVarmi, async (req, res, next) => {
       "role_name": "admin" // giriş yapan kulanıcının role adı
     }
    */
-
   try {
-    let { password } = req.body;
-    const isPasswordMatch = bcrypt.compareSync(
-      password,
-      req.currentUser.password
-    );
-    const payload = {
+    let payload = {
       subject: req.currentUser.user_id,
       username: req.currentUser.username,
       role_name: req.currentUser.role_name,
     };
-
-    if (isPasswordMatch) {
-      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
-
-      res.status(200).json({
-        message: `${req.currentUser.username} geri geldi!`,
-        token: token,
-      });
-    } else {
-      next(error);
-    }
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
+    res.json({
+      message: `${req.currentUser.username} geri geldi!`,
+      token: token,
+    });
   } catch (error) {
     next(error);
   }

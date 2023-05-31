@@ -22,7 +22,8 @@ function bul() {
     .leftJoin("roles as r", "r.role_id", "u.role_id")
     .select("u.user_id", "u.username", "r.role_name");
 }
-
+//goreBul({username:"veysel"});
+//goreBul({user_id:1})
 function goreBul(filtre) {
   /**
     2 tabloyu birleştirmeniz gerekiyor
@@ -37,14 +38,13 @@ function goreBul(filtre) {
       }
     ]
    */
-
   return db("users as u")
     .leftJoin("roles as r", "r.role_id", "u.role_id")
-    .select("u.user_id", "u.username", "u.password", "r.role_name")
-    .where(filtre);
+    .select("u.*", "r.role_name")
+    .where("u.username", filtre);
 }
 
-async function idyeGoreBul(user_id) {
+function idyeGoreBul(user_id) {
   /**
     2 tabloyu birleştirmeniz gerekiyor
     Verilen id li kullanıcıyı çözümlemeli
@@ -55,12 +55,11 @@ async function idyeGoreBul(user_id) {
       "role_name": "instructor"
     }
    */
-  const users = await db("users as u")
+  return db("users as u")
     .leftJoin("roles as r", "r.role_id", "u.role_id")
     .select("u.user_id", "u.username", "r.role_name")
-    .where({ "u.user_id": user_id });
-
-  return users[0];
+    .where("u.user_id", user_id)
+    .first();
 }
 
 /**

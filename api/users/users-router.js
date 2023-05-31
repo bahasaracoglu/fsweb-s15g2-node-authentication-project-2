@@ -21,7 +21,7 @@ router.get("/", sinirli, (req, res, next) => {
   // hazır
   Users.bul()
     .then((users) => {
-      res.status(200).json(users);
+      res.json(users);
     })
     .catch(next);
 });
