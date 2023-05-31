@@ -77,10 +77,10 @@ const rolAdiGecerlimi = (req, res, next) => {
   */
 
   try {
-    let role_name = req.body;
+    let { role_name } = req.body;
     role_name = role_name.trim();
     if (role_name) {
-      if ((role_name = "admin")) {
+      if (role_name == "admin") {
         res.status(422).json({ message: "Rol adı admin olamaz" });
       } else if (role_name.length > 32) {
         res
@@ -101,8 +101,8 @@ const rolAdiGecerlimi = (req, res, next) => {
 
 const checkPayload = (req, res, next) => {
   try {
-    const { user_name, password } = req.body;
-    if (!user_name || !password) {
+    const { username, password } = req.body;
+    if (!username || !password) {
       res.status(400).json({ message: "Girilen bilgiler eksik!" });
     } else {
       next();

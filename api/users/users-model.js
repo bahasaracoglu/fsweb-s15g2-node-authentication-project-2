@@ -19,7 +19,7 @@ function bul() {
     ]
    */
   return db("users as u")
-    .leftjoin("roles as r", "r.role_id", "u.role_id")
+    .leftJoin("roles as r", "r.role_id", "u.role_id")
     .select("u.user_id", "u.username", "r.role_name");
 }
 
@@ -39,7 +39,7 @@ function goreBul(filtre) {
    */
 
   return db("users as u")
-    .leftjoin("roles as r", "r.role_id", "u.role_id")
+    .leftJoin("roles as r", "r.role_id", "u.role_id")
     .select("u.user_id", "u.username", "u.password", "r.role_name")
     .where(filtre);
 }
@@ -56,7 +56,7 @@ async function idyeGoreBul(user_id) {
     }
    */
   const users = await db("users as u")
-    .leftjoin("roles as r", "r.role_id", "u.role_id")
+    .leftJoin("roles as r", "r.role_id", "u.role_id")
     .select("u.user_id", "u.username", "r.role_name")
     .where({ "u.user_id": user_id });
 

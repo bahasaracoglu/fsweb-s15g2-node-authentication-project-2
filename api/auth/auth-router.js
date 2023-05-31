@@ -7,10 +7,12 @@ const {
 const { JWT_SECRET } = require("../secrets"); // bu secret'ı kullanın!
 const bcrypt = require("bcryptjs");
 const usersModel = require("../users/users-model");
+const jwt = require("jsonwebtoken");
 
 router.post(
   "/register",
   checkPayload,
+  usernameVarmi,
   rolAdiGecerlimi,
   async (req, res, next) => {
     /**
@@ -40,7 +42,7 @@ router.post(
   }
 );
 
-router.post("/login", usernameVarmi, (req, res, next) => {
+router.post("/login", checkPayload, usernameVarmi, async (req, res, next) => {
   /**
     [POST] /api/auth/login { "username": "sue", "password": "1234" }
 
@@ -59,6 +61,32 @@ router.post("/login", usernameVarmi, (req, res, next) => {
       "role_name": "admin" // giriş yapan kulanıcının role adı
     }
    */
+
+  try {
+    let { password } = req.body;
+    const isPasswordMatch = bcrypt.compareSync(
+      password,
+      req.currentUser.password
+    );
+    const payload = {
+      subject: req.currentUser.user_id,
+      username: req.currentUser.username,
+      role_name: req.currentUser.role_name,
+    };
+
+    if (isPasswordMatch) {
+      const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1d" });
+
+      res.status(200).json({
+        message: `${req.currentUser.username} geri geldi!`,
+        token: token,
+      });
+    } else {
+      next(error);
+    }
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
