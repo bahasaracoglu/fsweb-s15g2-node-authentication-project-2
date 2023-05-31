@@ -16,9 +16,9 @@ const sinirli = (req, res, next) => {
 
     Alt akıştaki middlewarelar için hayatı kolaylaştırmak için kodu çözülmüş tokeni req nesnesine koyun!
   */
-}
+};
 
-const sadece = role_name => (req, res, next) => {
+const sadece = (role_name) => (req, res, next) => {
   /*
     
 	Kullanıcı, Authorization headerında, kendi payloadu içinde bu fonksiyona bağımsız değişken olarak iletilen 
@@ -30,8 +30,7 @@ const sadece = role_name => (req, res, next) => {
 
     Tekrar authorize etmekten kaçınmak için kodu çözülmüş tokeni req nesnesinden çekin!
   */
-}
-
+};
 
 const usernameVarmi = (req, res, next) => {
   /*
@@ -41,8 +40,7 @@ const usernameVarmi = (req, res, next) => {
       "message": "Geçersiz kriter"
     }
   */
-}
-
+};
 
 const rolAdiGecerlimi = (req, res, next) => {
   /*
@@ -63,11 +61,47 @@ const rolAdiGecerlimi = (req, res, next) => {
       "message": "rol adı 32 karakterden fazla olamaz"
     }
   */
-}
+
+  try {
+    let role_name = req.body;
+    role_name = role_name.trim();
+    if (role_name) {
+      if ((role_name = "admin")) {
+        res.status(422).json({ message: "Rol adı admin olamaz" });
+      } else if (role_name.length > 32) {
+        res
+          .status(422)
+          .json({ message: "rol adı 32 karakterden fazla olamaz" });
+      }
+      next();
+    } else {
+      if (!role_name || role_name.length < 0) {
+        role_name = "student";
+        next();
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+const checkPayload = (req, res, next) => {
+  try {
+    const { user_name, password } = req.body;
+    if (!user_name || !password) {
+      res.status(400).json({ message: "Girilen bilgiler eksik!" });
+    } else {
+      next();
+    }
+  } catch (error) {
+    next(error);
+  }
+};
 
 module.exports = {
   sinirli,
   usernameVarmi,
   rolAdiGecerlimi,
   sadece,
-}
+  checkPayload,
+};
