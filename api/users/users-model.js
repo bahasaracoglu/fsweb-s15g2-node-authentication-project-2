@@ -44,7 +44,7 @@ function goreBul(filtre) {
     .where(filtre);
 }
 
-function idyeGoreBul(user_id) {
+async function idyeGoreBul(user_id) {
   /**
     2 tabloyu birleştirmeniz gerekiyor
     Verilen id li kullanıcıyı çözümlemeli
@@ -55,11 +55,12 @@ function idyeGoreBul(user_id) {
       "role_name": "instructor"
     }
    */
-
-  return db("users as u")
+  const users = await db("users as u")
     .leftjoin("roles as r", "r.role_id", "u.role_id")
     .select("u.user_id", "u.username", "r.role_name")
     .where({ "u.user_id": user_id });
+
+  return users[0];
 }
 
 /**
